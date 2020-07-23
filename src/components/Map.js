@@ -241,7 +241,7 @@ export default function Map(props) {
     setSelected(id);
     eventShow(false);
     userEventShow(false);
-    setPageNum(1)
+    setPageNum(1);
     await allEvents();
   };
 
@@ -252,12 +252,6 @@ export default function Map(props) {
     <div>
       {props.user.isAuthenticated ? (
         <div>
-          <div className="blackBox">
-            <Navbar.Brand className="navText">
-              JoinMe<i class="fas fa-users"></i>
-            </Navbar.Brand>
-          </div>
-
           {/* EVENT LIST */}
           <Modal show={eventList} size="xl">
             <Modal.Body className="eventModal">

@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Navbar, Button, Modal, Form, Badge } from "react-bootstrap";
+import {
+  Navbar,
+  Button,
+  Modal,
+  Form,
+  Badge,
+  Container,
+  Row,
+  Col,
+} from "react-bootstrap";
 const Joi = require("joi-browser");
 
 export default function Nav(props) {
@@ -96,10 +105,14 @@ export default function Nav(props) {
   return (
     <div>
       <Navbar className="navBar">
+        <Navbar.Brand
+          className="navText"
+          style={{ backgroundColor: "black", padding: "15px", margin: "0" }}
+        >
+          JoinMe<i class="fas fa-users"></i> ▾
+        </Navbar.Brand>
         <div className="container">
-          <Navbar.Brand className="navText">
-            JoinMe<i class="fas fa-users"></i>
-          </Navbar.Brand>
+          <Navbar.Brand />
           {!props.user.isAuthenticated ? (
             <Form inline>
               <Button className="navBtn" onClick={() => loginShow(true)}>
@@ -111,12 +124,19 @@ export default function Nav(props) {
             </Form>
           ) : (
             <div>
-              <Badge pill variant="dark" style={{fontSize:"14px"}}>
-                Hello {props.user.name}
-              </Badge>
-              <Button className="navBtn" onClick={() => logOut()}>
-                Logout
-              </Button>
+              <Row>
+                <Col></Col>
+                <Col>
+                  <Badge pill variant="dark" style={{ fontSize: "14px" }}>
+                    Hello {props.user.name}
+                  </Badge>
+                </Col>
+                <Col>
+                  <Button className="navBtn" onClick={() => logOut()}>
+                    Logout
+                  </Button>
+                </Col>
+              </Row>
             </div>
           )}
         </div>

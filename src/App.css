@@ -52,7 +52,7 @@ p {
   text-align: center;
   margin-top: 12px;
   width: 33%;
-  z-index: 3;
+  z-index: 9001;
 }
 
 .eventButton {
@@ -262,9 +262,10 @@ img.friendPic {
   width: 2.5rem;
 }
 .dropdownMenu {
-  height: 70vh;
+  height: 80vh;
   width: 15rem;
   background-color: white;
+  border-radius: 15px;
 }
 
 #dropdown-item-button {
@@ -272,6 +273,7 @@ img.friendPic {
   width: 15rem;
   border-radius: 0;
   height: 60px;
+  top: 60px;
   background-color: rgba(0, 0, 0, 0);
   border: none;
   outline: none;
@@ -283,19 +285,9 @@ img.friendPic {
 }
 .dropdown-toggle:empty::after {
   margin-left: 105px;
+  color: rgba(0, 0, 0, 0)
 }
-
-.blackBox {
-  position: absolute;
-  background-color: black;
-  width: 15rem;
-  height: 60px;
-  z-index: 4;
-  padding-top: 10px;
-  padding-left: 70px;
-}
-
 .badge{
   position: relative;
-  top: 2.7px;
+  top: 7px;
 }
