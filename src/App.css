@@ -1,6 +1,6 @@
 body {
   background-color: black;
-  font-family: "Epilogue", sans-serif;
+  font-family: Helvetica, sans-serif;
 }
 
 p {
@@ -8,10 +8,22 @@ p {
   font-family: Helvetica, sans-serif;
 }
 
+.jumbotron-fluid{
+  height: 100vh;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+}
+
+.jumbotron{
+  padding: 0;
+  padding-top: 30vh;
+  margin: 0;
+}
+
 .navText {
   color: white !important;
-  font-family: "Open Sans Condensed", sans-serif;
-  font-weight: bold;
+  font-family: "Fredoka One", cursive;
   z-index: 9000;
 }
 
@@ -136,13 +148,13 @@ label.form-label {
 }
 
 .DefaultProgressBar_progressBar {
-  background-color: #333333!important;
+  background-color: #333333 !important;
 }
 
 .DefaultProgressBar_background__horizontal {
   height: 8px !important;
   top: 1px !important;
-  background-color: white!important;
+  background-color: white !important;
 }
 
 .handleContainer {
@@ -270,7 +282,7 @@ img.friendPic {
   box-shadow: none;
 }
 .dropdown-toggle:empty::after {
-  margin-left: 85px;
+  margin-left: 105px;
 }
 
 .blackBox {
@@ -281,4 +293,9 @@ img.friendPic {
   z-index: 4;
   padding-top: 10px;
   padding-left: 70px;
+}
+
+.badge{
+  position: relative;
+  top: 2.7px;
 }

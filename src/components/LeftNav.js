@@ -40,7 +40,12 @@ export default function LeftNav(props) {
               Your Events
             </Dropdown.Item>
             <br></br>
-            <p style={{ textAlign: "center", fontWeight: "bold" }}>
+            <p
+              style={{
+                textAlign: "center",
+                fontFamily: "Fredoka One, cursive",
+              }}
+            >
               Friend List
             </p>
             <Dropdown.Divider />
@@ -54,14 +59,14 @@ export default function LeftNav(props) {
                 <div>
                   <table style={{ width: "100%" }}>
                     <tr>
-                      <td>
+                      <td style={{ width: "50px" }}>
                         <img
                           className="friendPic"
                           src={`/${id.name}.png`}
                           alt="profile-pic"
                         ></img>
                       </td>
-                      <td>{id.name}</td>
+                      <td style={{ textAlign: "left" }}>{id.name}</td>
                     </tr>
                   </table>
                 </div>

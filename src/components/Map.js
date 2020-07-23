@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Button, Navbar, Modal, Dropdown } from "react-bootstrap";
+import { Button, Navbar, Modal, Dropdown, Jumbotron } from "react-bootstrap";
 import {
   GoogleMap,
   useLoadScript,
@@ -80,6 +80,7 @@ export default function Map(props) {
   const [rightClickDelete, setRightClickDelete] = useState("");
   const [filterUser, setFilterUser] = useState("");
   const [modalEventsUser, setModalEventsUser] = useState([]);
+  const [userMaxPageNum, setUserMaxPageNum] = useState(1);
   // eslint-disable-next-line
 
   const markerOptions = {
@@ -117,7 +118,6 @@ export default function Map(props) {
   // FETCH TO PAGINATE
   useEffect(() => {
     if (!props.user.isAuthenticated) return;
-
     async function fetchData() {
       const data = await fetch(
         `${process.env.REACT_APP_API_URL}/event/modal?page=${pageNum}`
@@ -139,7 +139,7 @@ export default function Map(props) {
       );
       const resp = await data.json();
       setModalEventsUser(resp.data);
-      setMaxPageNum(parseInt(resp.maxPageNum));
+      setUserMaxPageNum(parseInt(resp.maxPageNum));
     }
     fetchData();
   }, [pageNum, coordinates]);
@@ -241,6 +241,7 @@ export default function Map(props) {
     setSelected(id);
     eventShow(false);
     userEventShow(false);
+    setPageNum(1)
     await allEvents();
   };
 
@@ -249,309 +250,329 @@ export default function Map(props) {
 
   return (
     <div>
-      <div className="blackBox">
-        <Navbar.Brand className="navText">
-          JoinMe<i class="fas fa-users"></i>
-        </Navbar.Brand>
-      </div>
+      {props.user.isAuthenticated ? (
+        <div>
+          <div className="blackBox">
+            <Navbar.Brand className="navText">
+              JoinMe<i class="fas fa-users"></i>
+            </Navbar.Brand>
+          </div>
 
-      {/* EVENT LIST */}
-      <Modal show={eventList} size="xl">
-        <Modal.Body className="eventModal">
-          <table style={{ width: "100%" }}>
-            <tbody style={{ textAlign: "center" }}>
-              <tr>
-                <td width={25}>Title:</td>
-                <td width={15}>Created by:</td>
-                <td width={25}>Date:</td>
-                <td width={25}>Details:</td>
-              </tr>
-              <tr>
-                <td colSpan={4}>
-                  <Dropdown.Divider />
-                </td>
-              </tr>
+          {/* EVENT LIST */}
+          <Modal show={eventList} size="xl">
+            <Modal.Body className="eventModal">
+              <table style={{ width: "100%" }}>
+                <tbody style={{ textAlign: "center" }}>
+                  <tr>
+                    <td>Created by:</td>
+                    <td></td>
+                    <td>Title:</td>
+                    <td>Date:</td>
+                    <td>Details:</td>
+                  </tr>
+                  <tr>
+                    <td colSpan={5}>
+                      <Dropdown.Divider />
+                    </td>
+                  </tr>
 
-              {modalEvents.map((id) => (
-                <tr key={id._id} style={{ height: "50px" }}>
-                  <td width={45} style={{ textAlign: "Left" }}>
-                    {id.title}
-                  </td>
-                  <td width={15}>
-                    <img
-                      src={`/${id.name}.png`}
-                      alt="profile-pic"
-                      style={{ width: "40px", marginRight: "15px" }}
-                    ></img>
-                    {id.name}
-                  </td>
-                  <td width={25}>{id.date}</td>
-                  <td width={10}>
-                    <Button onClick={() => detailPanTo(id)}>Details</Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Modal.Body>
-        <Modal.Footer className="eventModal">
-          <table style={{ width: "100%" }}>
-            <tbody>
-              <tr>
-                <td width={50} style={{ textAlign: "center" }}>
-                  <PaginationLink
-                    disabled={pageNum === 1}
-                    handleClick={goPrevPage}
-                  >
-                    Previous Page
-                  </PaginationLink>
-                </td>
-                <td width={50} style={{ textAlign: "center" }}>
-                  <PaginationLink
-                    disabled={pageNum === maxPageNum}
-                    handleClick={goNextPage}
-                  >
-                    Next Page
-                  </PaginationLink>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  {modalEvents.map((id) => (
+                    <tr key={id._id} style={{ height: "50px" }}>
+                      <td>
+                        <img
+                          src={`/${id.name}.png`}
+                          alt="profile-pic"
+                          style={{ width: "40px", marginRight: "15px" }}
+                        ></img>
+                      </td>
+                      <td>{id.name}</td>
+                      <td style={{ textAlign: "center" }}>{id.title}</td>
+                      <td>{id.date}</td>
+                      <td>
+                        <Button onClick={() => detailPanTo(id)}>Details</Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Modal.Body>
+            <Modal.Footer className="eventModal">
+              <table style={{ width: "100%" }}>
+                <tbody>
+                  <tr>
+                    <td width={50} style={{ textAlign: "center" }}>
+                      <PaginationLink
+                        disabled={pageNum === 1}
+                        handleClick={goPrevPage}
+                      >
+                        Previous Page
+                      </PaginationLink>
+                    </td>
+                    <td width={50} style={{ textAlign: "center" }}>
+                      <PaginationLink
+                        disabled={pageNum === maxPageNum}
+                        handleClick={goNextPage}
+                      >
+                        Next Page
+                      </PaginationLink>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div className="container">
+                <Button
+                  centered
+                  style={{ width: "100%", marginLeft: "0" }}
+                  variant="secondary"
+                  onClick={() => eventShow(false)}
+                >
+                  Close
+                </Button>
+              </div>
+            </Modal.Footer>
+          </Modal>
 
-          <Button
-            centered
-            style={{ width: "100%", marginLeft: "0" }}
-            variant="secondary"
-            onClick={() => eventShow(false)}
+          {/* USER EVENTS ONLY */}
+          <Modal show={userEventList} size="xl">
+            <Modal.Body className="eventModal">
+              <table style={{ width: "100%" }}>
+                <tbody style={{ textAlign: "center" }}>
+                  <tr>
+                    <td>Created by:</td>
+                    <td></td>
+                    <td>Title:</td>
+                    <td>Date:</td>
+                    <td>Details:</td>
+                  </tr>
+                  <tr>
+                    <td colSpan={5}>
+                      <Dropdown.Divider />
+                    </td>
+                  </tr>
+
+                  {modalEventsUser.map((id) => (
+                    <tr key={id._id} style={{ height: "50px" }}>
+                      <td>
+                        <img
+                          src={`/${id.name}.png`}
+                          alt="profile-pic"
+                          style={{ width: "40px", marginRight: "15px" }}
+                        ></img>
+                      </td>
+                      <td>{id.name}</td>
+                      <td style={{ textAlign: "center" }}>{id.title}</td>
+                      <td>{id.date}</td>
+                      <td>
+                        <Button onClick={() => detailPanTo(id)}>Details</Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Modal.Body>
+            <Modal.Footer className="eventModal">
+              <table style={{ width: "100%" }}>
+                <tbody>
+                  <tr>
+                    <td width={50} style={{ textAlign: "center" }}>
+                      <PaginationLink
+                        disabled={pageNum === 1}
+                        handleClick={goPrevPage}
+                      >
+                        Previous Page
+                      </PaginationLink>
+                    </td>
+                    <td width={50} style={{ textAlign: "center" }}>
+                      <PaginationLink
+                        disabled={pageNum === userMaxPageNum}
+                        handleClick={goNextPage}
+                      >
+                        Next Page
+                      </PaginationLink>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div className="container">
+                <Button
+                  centered
+                  style={{ width: "100%", marginLeft: "0" }}
+                  variant="secondary"
+                  onClick={() => userEventShow(false)}
+                >
+                  Close
+                </Button>
+              </div>
+            </Modal.Footer>
+          </Modal>
+
+          {/* CREATE EVENT MODAL */}
+          <EventModal
+            streetAddress={streetAddress}
+            lng={lng}
+            lat={lat}
+            show={show}
+            handleClose={handleClose}
+            handleShow={handleShow}
+            setCoordinates={setCoordinates}
+            day={props.day}
+            user={props.user}
+            apiDate={apiDate}
+          />
+          <Search panTo={panTo} searchShow={searchShow} lat={lat} lng={lng} />
+          <Locate panTo={panTo} />
+          <section style={{ width: "100vw" }}>
+            <div className="pagination">
+              <Paginations
+                setDay={props.setDay}
+                setApiDate={setApiDate}
+                allEvents={allEvents}
+                setSelected={setSelected}
+                setRightClick={setRightClick}
+              />
+            </div>
+          </section>
+
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            zoom={14}
+            center={center}
+            options={options}
+            onDblClick={onMapClick}
+            onLoad={onMapLoad}
           >
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            {coordinates.map((coordinate) => (
+              <Marker
+                options={markerOptions}
+                key={coordinate._id}
+                position={{ lat: coordinate.lat, lng: coordinate.lng }}
+                icon={{
+                  url: `/${coordinate.name}.png`,
+                  scaledSize: new window.google.maps.Size(4, 4, "rem", "rem"),
+                  shape: new window.google.maps.Circle(),
+                  origin: new window.google.maps.Point(0, 0),
+                  anchor: new window.google.maps.Point(30, 30),
+                }}
+                // label={coordinate.title}
+                title={coordinate.title}
+                // POP UP EVENT DETAILS
+                onClick={() => {
+                  setSelected(coordinate);
+                  setRightClick(null);
+                }}
+                onRightClick={() => {
+                  setId(coordinate._id);
+                  setRightClick(coordinate);
+                  setSelected(null);
+                  setRightClickDelete(coordinate);
+                }}
+              ></Marker>
+            ))}
+            {rightClick ? (
+              <InfoWindow
+                position={{ lat: rightClick.lat, lng: rightClick.lng }}
+                onCloseClick={() => setRightClick(null)}
+              >
+                <div>
+                  {props.user.name === rightClickDelete.name ? (
+                    <Button type="submit" onClick={(e) => deleteEvent(e)}>
+                      Delete?
+                    </Button>
+                  ) : (
+                    <div>Only Creator Can Delete Event</div>
+                  )}
+                </div>
+              </InfoWindow>
+            ) : null}
+            {selected ? (
+              <InfoWindow
+                position={{ lat: selected.lat, lng: selected.lng }}
+                onCloseClick={() => setSelected(null)}
+              >
+                <table style={{ width: "100%" }}>
+                  {console.log(selected)}
+                  <tbody style={{ textAlign: "center" }}>
+                    <tr>
+                      <td colSpan={2}>
+                        <h5>{selected.title}</h5>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={2} style={{ textAlign: "left" }}>
+                        <p>
+                          <b>Created by: </b> {selected.name}
+                        </p>
+                        <hr />
+                      </td>
+                    </tr>
 
-      {/* USER EVENTS ONLY */}
-      <Modal show={userEventList} size="xl">
-        <Modal.Body className="eventModal">
-          <table style={{ width: "100%" }}>
-            <tbody style={{ textAlign: "center" }}>
-              <tr>
-                <td width={25}>Title:</td>
-                <td width={15}>Created by:</td>
-                <td width={25}>Date:</td>
-                <td width={25}>Details:</td>
-              </tr>
-              <tr>
-                <td colSpan={4}>
-                  <Dropdown.Divider />
-                </td>
-              </tr>
-
-              {modalEventsUser.map((id) => (
-                <tr key={id._id} style={{ height: "50px" }}>
-                  <td width={45} style={{ textAlign: "Left" }}>
-                    {id.title}
-                  </td>
-                  <td width={15}>
-                    <img
-                      src={`/${id.name}.png`}
-                      alt="profile-pic"
-                      style={{ width: "40px", marginRight: "15px" }}
-                    ></img>
-                    {id.name}
-                  </td>
-                  <td width={25}>{id.date}</td>
-                  <td width={10}>
-                    <Button onClick={() => detailPanTo(id)}>Details</Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Modal.Body>
-        <Modal.Footer className="eventModal">
-          <table style={{ width: "100%" }}>
-            <tbody>
-              <tr>
-                <td width={50} style={{ textAlign: "center" }}>
-                  <PaginationLink
-                    disabled={pageNum === 1}
-                    handleClick={goPrevPage}
-                  >
-                    Previous Page
-                  </PaginationLink>
-                </td>
-                <td width={50} style={{ textAlign: "center" }}>
-                  <PaginationLink
-                    disabled={pageNum === maxPageNum}
-                    handleClick={goNextPage}
-                  >
-                    Next Page
-                  </PaginationLink>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <Button
-            centered
-            style={{ width: "100%", marginLeft: "0" }}
-            variant="secondary"
-            onClick={() => userEventShow(false)}
-          >
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* CREATE EVENT MODAL */}
-      <EventModal
-        streetAddress={streetAddress}
-        lng={lng}
-        lat={lat}
-        show={show}
-        handleClose={handleClose}
-        handleShow={handleShow}
-        setCoordinates={setCoordinates}
-        day={props.day}
-        user={props.user}
-        apiDate={apiDate}
-      />
-      <Search panTo={panTo} searchShow={searchShow} lat={lat} lng={lng} />
-      <Locate panTo={panTo} />
-      <section style={{ width: "100vw" }}>
-        <div className="pagination">
-          <Paginations
-            setDay={props.setDay}
-            setApiDate={setApiDate}
-            allEvents={allEvents}
-            setSelected={setSelected}
-            setRightClick={setRightClick}
+                    <tr>
+                      <td colSpan={2} style={{ textAlign: "left" }}>
+                        <p>
+                          <b>Description: </b> {selected.description}
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={2} style={{ textAlign: "left" }}>
+                        <p>
+                          <b>Date: </b>
+                          {selected.date}
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ textAlign: "left" }}>
+                        <p>
+                          <b>Start: </b> {selected.startTime}:00
+                        </p>
+                      </td>
+                      <td style={{ textAlign: "left" }}>
+                        <p>
+                          <b>End: </b> {selected.endTime}:00
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={2}>
+                        <a
+                          target="_blank"
+                          href={`https://www.google.com/maps/search/?api=1&query=${selected.lat},${selected.lng}`}
+                        >
+                          {`Open in Google Maps: `}
+                        </a>
+                        {selected.address}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </InfoWindow>
+            ) : null}
+          </GoogleMap>
+          <LeftNav
+            eventShow={eventShow}
+            user={props.user}
+            setFilterUser={setFilterUser}
+            userEventShow={userEventShow}
           />
         </div>
-      </section>
-
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        zoom={14}
-        center={center}
-        options={options}
-        onDblClick={onMapClick}
-        onLoad={onMapLoad}
-      >
-        {coordinates.map((coordinate) => (
-          <Marker
-            options={markerOptions}
-            key={coordinate._id}
-            position={{ lat: coordinate.lat, lng: coordinate.lng }}
-            icon={{
-              url: `/${coordinate.name}.png`,
-              scaledSize: new window.google.maps.Size(4, 4, "rem", "rem"),
-              shape: new window.google.maps.Circle(),
-              origin: new window.google.maps.Point(0, 0),
-              anchor: new window.google.maps.Point(30, 30),
-            }}
-            // label={coordinate.title}
-            title={coordinate.title}
-            // POP UP EVENT DETAILS
-            onClick={() => {
-              setSelected(coordinate);
-              setRightClick(null);
-            }}
-            onRightClick={() => {
-              setId(coordinate._id);
-              setRightClick(coordinate);
-              setSelected(null);
-              setRightClickDelete(coordinate);
-            }}
-          ></Marker>
-        ))}
-        {rightClick ? (
-          <InfoWindow
-            position={{ lat: rightClick.lat, lng: rightClick.lng }}
-            onCloseClick={() => setRightClick(null)}
-          >
-            <div>
-              {props.user.name === rightClickDelete.name ? (
-                <Button type="submit" onClick={(e) => deleteEvent(e)}>
-                  Delete?
-                </Button>
-              ) : (
-                <div>Only Creator Can Delete Event</div>
-              )}
-            </div>
-          </InfoWindow>
-        ) : null}
-        {selected ? (
-          <InfoWindow
-            position={{ lat: selected.lat, lng: selected.lng }}
-            onCloseClick={() => setSelected(null)}
-          >
-            <table style={{ width: "100%" }}>
-              {console.log(selected)}
-              <tbody style={{ textAlign: "center" }}>
-                <tr>
-                  <td colSpan={2}>
-                    <h5>{selected.title}</h5>
-                  </td>
-                </tr>
-                <tr>
-                  <td colSpan={2} style={{ textAlign: "left" }}>
-                    <p>
-                      <b>Created by: </b> {selected.name}
-                    </p>
-                    <hr />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td colSpan={2} style={{ textAlign: "left" }}>
-                    <p>
-                      <b>Description: </b> {selected.description}
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td colSpan={2} style={{ textAlign: "left" }}>
-                    <p>
-                      <b>Date: </b>
-                      {selected.date}
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ textAlign: "left" }}>
-                    <p>
-                      <b>Start: </b> {selected.startTime}:00
-                    </p>
-                  </td>
-                  <td style={{ textAlign: "left" }}>
-                    <p>
-                      <b>End: </b> {selected.endTime}:00
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td colSpan={2}>
-                    <a
-                      target="_blank"
-                      href={`https://www.google.com/maps/search/?api=1&query=${selected.lat},${selected.lng}`}
-                    >
-                      {`Open in Google Maps: `}
-                    </a>
-                    {selected.address}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </InfoWindow>
-        ) : null}
-      </GoogleMap>
-      <LeftNav
-        eventShow={eventShow}
-        user={props.user}
-        setFilterUser={setFilterUser}
-        userEventShow={userEventShow}
-      />
-      {/* <Button onClick={() => reverseGeo()}>REversee</Button> */}
+      ) : (
+        <Jumbotron
+          fluid
+          style={{
+            backgroundImage: "url(./splash.jpg)",
+            backgroundSize: "cover",
+          }}
+        >
+          <div className="container">
+            <h1 style={{ fontFamily: "Fredoka One, cursive" }}>
+              JoinMe<i class="fas fa-users"></i>
+            </h1>
+            <h5>Never miss an opportunity to spend time with friends.</h5>
+            <p>Login or Register to continue</p>
+          </div>
+        </Jumbotron>
+      )}
     </div>
   );
 }
