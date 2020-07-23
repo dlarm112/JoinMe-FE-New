@@ -71,34 +71,53 @@ export default function Map(props) {
   const [rightClick, setRightClick] = useState(null);
   const [id, setId] = useState(null);
   const [eventList, setEventList] = useState(null);
+  const [userEventList, setUserEventList] = useState(null);
   const [modalEvents, setModalEvents] = useState([]);
   const [pageNum, setPageNum] = useState(1);
   const [maxPageNum, setMaxPageNum] = useState(1);
   const [streetAddress, setStreetAddress] = useState("");
   const [apiDate, setApiDate] = useState(moment("MMDDYYYY"));
+  const [rightClickDelete, setRightClickDelete] = useState("");
+  const [filterUser, setFilterUser] = useState("");
+  const [modalEventsUser, setModalEventsUser] = useState([]);
   // eslint-disable-next-line
 
   const markerOptions = {
     clickable: true,
   };
 
-  // FETCH TO MAP MARKERS
-
   // FETCH CERTAIN DAY
   useEffect(() => {
+    if (!props.user.isAuthenticated) return;
+
     async function fetchData() {
       const data = await fetch(
         `${process.env.REACT_APP_API_URL}/event/${apiDate}`
       );
       const resp = await data.json();
       setCoordinates(resp);
-      console.log("EVENTS: ", resp);
     }
     fetchData();
-  }, [apiDate]);
+  }, [apiDate, props.user]);
+
+  //FETCH CERTAIN USER LEFT NAV
+  useEffect(() => {
+    if (!props.user.isAuthenticated) return;
+
+    async function fetchData() {
+      const data = await fetch(
+        `${process.env.REACT_APP_API_URL}/event/user/${filterUser}`
+      );
+      const resp = await data.json();
+      setCoordinates(resp);
+    }
+    fetchData();
+  }, [filterUser]);
 
   // FETCH TO PAGINATE
   useEffect(() => {
+    if (!props.user.isAuthenticated) return;
+
     async function fetchData() {
       const data = await fetch(
         `${process.env.REACT_APP_API_URL}/event/modal?page=${pageNum}`
@@ -110,8 +129,25 @@ export default function Map(props) {
     fetchData();
   }, [pageNum, coordinates]);
 
+  //FETCH TO PAGINATE USER
+
+  useEffect(() => {
+    if (!props.user.isAuthenticated) return;
+    async function fetchData() {
+      const data = await fetch(
+        `${process.env.REACT_APP_API_URL}/event/modal/${props.user.name}?page=${pageNum}`
+      );
+      const resp = await data.json();
+      setModalEventsUser(resp.data);
+      setMaxPageNum(parseInt(resp.maxPageNum));
+    }
+    fetchData();
+  }, [pageNum, coordinates]);
+
   useEffect(() => {
     async function fetchData() {
+      if (!props.user.isAuthenticated) return;
+
       const data = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.REACT_APP_API_KEY}`
       );
@@ -142,7 +178,14 @@ export default function Map(props) {
     setEventList(e);
   };
 
+  const userEventShow = (e) => {
+    setPageNum(1);
+    setUserEventList(e);
+  };
+
   const deleteEvent = async (e) => {
+    if (!props.user.isAuthenticated) return;
+
     e.preventDefault();
     await fetch(`${process.env.REACT_APP_API_URL}/event/${id}`, {
       method: "DELETE",
@@ -160,6 +203,9 @@ export default function Map(props) {
 
   // SHOW ALL EVENTS
   const allEvents = async (e) => {
+    if (!props.user.isAuthenticated) return;
+
+    setApiDate("");
     const data = await fetch(`${process.env.REACT_APP_API_URL}/event`);
     const resp = await data.json();
     setCoordinates(resp);
@@ -167,7 +213,13 @@ export default function Map(props) {
   };
 
   // DOUBLE CLICk MAP
-  const onMapClick = useCallback((event) => {
+  const onMapClick = (event) => {
+    if (props.user.isAuthenticated === true) {
+      onMapClick2(event);
+    } else alert("Login to create an event");
+  };
+
+  const onMapClick2 = useCallback((event) => {
     handleShow(event);
   }, []);
 
@@ -182,6 +234,7 @@ export default function Map(props) {
   }, []);
 
   const detailPanTo = useCallback((id) => {
+    allEvents();
     const lat = id.lat;
     const lng = id.lng;
     console.log(lng, lat);
@@ -201,13 +254,15 @@ export default function Map(props) {
           JoinMe<i class="fas fa-users"></i>
         </Navbar.Brand>
       </div>
+
+      {/* EVENT LIST */}
       <Modal show={eventList} size="xl">
         <Modal.Body className="eventModal">
           <table style={{ width: "100%" }}>
             <tbody style={{ textAlign: "center" }}>
               <tr>
                 <td width={25}>Title:</td>
-                <td width={25}>Created by:</td>
+                <td width={15}>Created by:</td>
                 <td width={25}>Date:</td>
                 <td width={25}>Details:</td>
               </tr>
@@ -219,10 +274,19 @@ export default function Map(props) {
 
               {modalEvents.map((id) => (
                 <tr key={id._id} style={{ height: "50px" }}>
-                  <td width={25}>{id.title}</td>
-                  <td width={25}>{id.name}</td>
+                  <td width={45} style={{ textAlign: "Left" }}>
+                    {id.title}
+                  </td>
+                  <td width={15}>
+                    <img
+                      src={`/${id.name}.png`}
+                      alt="profile-pic"
+                      style={{ width: "40px", marginRight: "15px" }}
+                    ></img>
+                    {id.name}
+                  </td>
                   <td width={25}>{id.date}</td>
-                  <td width={25}>
+                  <td width={10}>
                     <Button onClick={() => detailPanTo(id)}>Details</Button>
                   </td>
                 </tr>
@@ -234,7 +298,7 @@ export default function Map(props) {
           <table style={{ width: "100%" }}>
             <tbody>
               <tr>
-                <td style={{ textAlign: "center" }}>
+                <td width={50} style={{ textAlign: "center" }}>
                   <PaginationLink
                     disabled={pageNum === 1}
                     handleClick={goPrevPage}
@@ -242,7 +306,7 @@ export default function Map(props) {
                     Previous Page
                   </PaginationLink>
                 </td>
-                <td style={{ textAlign: "center" }}>
+                <td width={50} style={{ textAlign: "center" }}>
                   <PaginationLink
                     disabled={pageNum === maxPageNum}
                     handleClick={goNextPage}
@@ -264,6 +328,80 @@ export default function Map(props) {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* USER EVENTS ONLY */}
+      <Modal show={userEventList} size="xl">
+        <Modal.Body className="eventModal">
+          <table style={{ width: "100%" }}>
+            <tbody style={{ textAlign: "center" }}>
+              <tr>
+                <td width={25}>Title:</td>
+                <td width={15}>Created by:</td>
+                <td width={25}>Date:</td>
+                <td width={25}>Details:</td>
+              </tr>
+              <tr>
+                <td colSpan={4}>
+                  <Dropdown.Divider />
+                </td>
+              </tr>
+
+              {modalEventsUser.map((id) => (
+                <tr key={id._id} style={{ height: "50px" }}>
+                  <td width={45} style={{ textAlign: "Left" }}>
+                    {id.title}
+                  </td>
+                  <td width={15}>
+                    <img
+                      src={`/${id.name}.png`}
+                      alt="profile-pic"
+                      style={{ width: "40px", marginRight: "15px" }}
+                    ></img>
+                    {id.name}
+                  </td>
+                  <td width={25}>{id.date}</td>
+                  <td width={10}>
+                    <Button onClick={() => detailPanTo(id)}>Details</Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Modal.Body>
+        <Modal.Footer className="eventModal">
+          <table style={{ width: "100%" }}>
+            <tbody>
+              <tr>
+                <td width={50} style={{ textAlign: "center" }}>
+                  <PaginationLink
+                    disabled={pageNum === 1}
+                    handleClick={goPrevPage}
+                  >
+                    Previous Page
+                  </PaginationLink>
+                </td>
+                <td width={50} style={{ textAlign: "center" }}>
+                  <PaginationLink
+                    disabled={pageNum === maxPageNum}
+                    handleClick={goNextPage}
+                  >
+                    Next Page
+                  </PaginationLink>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <Button
+            centered
+            style={{ width: "100%", marginLeft: "0" }}
+            variant="secondary"
+            onClick={() => userEventShow(false)}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {/* CREATE EVENT MODAL */}
       <EventModal
         streetAddress={streetAddress}
@@ -285,6 +423,8 @@ export default function Map(props) {
             setDay={props.setDay}
             setApiDate={setApiDate}
             allEvents={allEvents}
+            setSelected={setSelected}
+            setRightClick={setRightClick}
           />
         </div>
       </section>
@@ -303,8 +443,7 @@ export default function Map(props) {
             key={coordinate._id}
             position={{ lat: coordinate.lat, lng: coordinate.lng }}
             icon={{
-              // url: `/${props.user.name}.png`,
-              url: "/Derek.png",
+              url: `/${coordinate.name}.png`,
               scaledSize: new window.google.maps.Size(4, 4, "rem", "rem"),
               shape: new window.google.maps.Circle(),
               origin: new window.google.maps.Point(0, 0),
@@ -321,6 +460,7 @@ export default function Map(props) {
               setId(coordinate._id);
               setRightClick(coordinate);
               setSelected(null);
+              setRightClickDelete(coordinate);
             }}
           ></Marker>
         ))}
@@ -330,9 +470,13 @@ export default function Map(props) {
             onCloseClick={() => setRightClick(null)}
           >
             <div>
-              <Button type="submit" onClick={(e) => deleteEvent(e)}>
-                Delete?
-              </Button>
+              {props.user.name === rightClickDelete.name ? (
+                <Button type="submit" onClick={(e) => deleteEvent(e)}>
+                  Delete?
+                </Button>
+              ) : (
+                <div>Only Creator Can Delete Event</div>
+              )}
             </div>
           </InfoWindow>
         ) : null}
@@ -401,7 +545,12 @@ export default function Map(props) {
           </InfoWindow>
         ) : null}
       </GoogleMap>
-      <LeftNav eventShow={eventShow} />
+      <LeftNav
+        eventShow={eventShow}
+        user={props.user}
+        setFilterUser={setFilterUser}
+        userEventShow={userEventShow}
+      />
       {/* <Button onClick={() => reverseGeo()}>REversee</Button> */}
     </div>
   );

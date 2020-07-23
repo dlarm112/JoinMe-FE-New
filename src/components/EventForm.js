@@ -17,6 +17,7 @@ export default function EventForm(props) {
   const [tempEndTime, setTempEndTime] = useState(24);
 
   const createEvent = async (e) => {
+    if (!props.user.isAuthenticated) return;
     const lat = props.lat;
     const lng = props.lng;
     const date = (moment(time).format("dddd") + ' ' + moment(time).format(

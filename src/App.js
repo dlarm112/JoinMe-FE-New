@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
-// import Home from "./views/Home";
-// import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { Map, Nav } from "./components/index";
 import "rheostat/initialize";
 import "rheostat/css/rheostat.css";
-// import axios from "axios";
 import "./App.css";
 
 function App(props) {
@@ -37,7 +34,7 @@ function App(props) {
     fetchUser();
   }, []);
 
-  console.log(user);
+  console.log("USER", user);
   return (
     <div>
       <Nav setUser={setUser} user={user} />

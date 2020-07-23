@@ -250,6 +250,10 @@ img.friendPic {
   width: 2.5rem;
 }
 
+img{
+  border: solid, white, 2px!important;
+}
+
 .dropdownMenu {
   height: 70vh;
   width: 15rem;

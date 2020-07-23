@@ -21,9 +21,6 @@ export default function Paginations(props) {
   const [day66, setDay66] = useState("");
   const [day77, setDay77] = useState("");
 
-  const [dayAll, setDayAll] = useState("");
-  const [checked, setChecked] = useState(false);
-
   const [display, setDisplay] = useState("");
   const [display2, setDisplay2] = useState("");
 
@@ -64,6 +61,8 @@ export default function Paginations(props) {
   }, []);
 
   useEffect(() => {
+    props.setRightClick(null)
+    props.setSelected(null)
     setDisplay2(moment(display).format("MMM Do YYYY"));
     props.setDay(display);
     props.setApiDate(moment(display).format("MMDDYYYY"));

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Navbar, Button, Modal, Form } from "react-bootstrap";
+import { Navbar, Button, Modal, Form, Badge } from "react-bootstrap";
 const Joi = require("joi-browser");
 
 export default function Nav(props) {
@@ -39,31 +39,52 @@ export default function Nav(props) {
       });
       const data = await res.json();
       localStorage.setItem("token", data.token);
-      // todo: setState user object
       props.setUser({ ...data.user, isAuthenticated: true });
     } catch (err) {
       console.log(err);
     }
-
     setShow(false);
   };
 
   const registerFunc = async (e) => {
     e.preventDefault();
-    const userData = {
-      name,
-      email,
-      password,
-    };
-    // eslint-disable-next-line
-    const newRegister = await fetch(`${process.env.REACT_APP_API_URL}/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    });
-    registerShow(false);
+    try {
+      const userData = {
+        name,
+        email,
+        password,
+      };
+      const loginData = {
+        email,
+        password,
+      };
+      console.log(userData);
+
+      const newRegister = await fetch(
+        `${process.env.REACT_APP_API_URL}/users`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userData),
+        }
+      );
+
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(loginData),
+      });
+      const data = await res.json();
+      localStorage.setItem("token", data.token);
+      props.setUser({ ...data.user, isAuthenticated: true });
+      registerShow(false);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const logOut = () => {
@@ -89,9 +110,14 @@ export default function Nav(props) {
               </Button>
             </Form>
           ) : (
-            <Button className="navBtn" onClick={() => logOut()}>
-              Logout
-            </Button>
+            <div>
+              <Badge pill variant="dark" style={{fontSize:"14px"}}>
+                Hello {props.user.name}
+              </Badge>
+              <Button className="navBtn" onClick={() => logOut()}>
+                Logout
+              </Button>
+            </div>
           )}
         </div>
       </Navbar>
@@ -115,7 +141,7 @@ export default function Nav(props) {
             <Form.Group controlId="password">
               <Form.Label>Password</Form.Label>
               <Form.Control
-                type="text"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 id="password"
@@ -152,7 +178,7 @@ export default function Nav(props) {
             <Form.Group controlId="password">
               <Form.Label>Password</Form.Label>
               <Form.Control
-                type="text"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
