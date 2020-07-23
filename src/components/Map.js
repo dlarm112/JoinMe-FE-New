@@ -241,8 +241,9 @@ export default function Map(props) {
     mapRef.current.setZoom(16);
     setSelected(id);
     eventShow(false);
+    userEventShow(false);
     await allEvents();
-  }
+  };
 
   if (loadError) return "Error loading maps";
   if (!isLoaded) return "Loading Maps";
