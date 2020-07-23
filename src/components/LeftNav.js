@@ -27,7 +27,7 @@ export default function LeftNav(props) {
 
   return (
     <div className="leftNav">
-      <DropdownButton id="dropdown-item-button" title="">
+      <DropdownButton id="dropdown-item-button" title="" >
         {props.user.isAuthenticated ? (
           <div className="dropdownMenu">
             <Dropdown.Item as="button" onClick={() => props.eventShow(true)}>
