@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { ToastContainer } from "react-toastify";
 // import Home from "./views/Home";
 // import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { Map, Nav } from "./components/index";
 import "rheostat/initialize";
 import "rheostat/css/rheostat.css";
 // import axios from "axios";
-import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 function App(props) {
@@ -42,7 +40,6 @@ function App(props) {
   console.log(user);
   return (
     <div>
-      <ToastContainer />
       <Nav setUser={setUser} user={user} />
       <Map user={user} setDay={setDay} day={day}/>
     </div>
