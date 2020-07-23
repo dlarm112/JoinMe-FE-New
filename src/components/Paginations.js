@@ -61,16 +61,20 @@ export default function Paginations(props) {
   }, []);
 
   useEffect(() => {
-    props.setRightClick(null)
-    props.setSelected(null)
+    props.setRightClick(null);
+    props.setSelected(null);
     setDisplay2(moment(display).format("MMM Do YYYY"));
     props.setDay(display);
     props.setApiDate(moment(display).format("MMDDYYYY"));
   }, [display]);
 
   const clickedPagination = async (e) => {
-    setDisplay(date.setDate(date.getDate() + (e - 1)));
-    props.setDay(display);
+    if (e < 20) {
+      setDisplay(date.setDate(date.getDate() + (e - 1)));
+      props.setDay(display);
+    }else if (e === 100){
+      setDisplay2("All Week")
+    }
 
     props.setApiDate(moment(display).format("MMDDYYYY"));
     if (e === 1) {
@@ -129,6 +133,15 @@ export default function Paginations(props) {
       setDay55(false);
       setDay66(false);
       setDay77(true);
+    } else if (e === 100) {
+      props.allEvents();
+      setDay11(false);
+      setDay22(false);
+      setDay33(false);
+      setDay44(false);
+      setDay55(false);
+      setDay66(false);
+      setDay77(false);
     }
   };
 
@@ -149,7 +162,7 @@ export default function Paginations(props) {
           <Col md={7}>{display2}</Col>
           <Col md={5}>
             <Button
-              onClick={() => props.allEvents()}
+              onClick={() => clickedPagination(100)}
               size="sm"
               variant="outline-primary"
             >

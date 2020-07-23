@@ -236,7 +236,6 @@ export default function Map(props) {
   const detailPanTo = async (id) => {
     const lat = id.lat;
     const lng = id.lng;
-    console.log(lng, lat);
     mapRef.current.panTo({ lat, lng });
     mapRef.current.setZoom(16);
     setSelected(id);
