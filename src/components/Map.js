@@ -81,6 +81,8 @@ export default function Map(props) {
   const [filterUser, setFilterUser] = useState("");
   const [modalEventsUser, setModalEventsUser] = useState([]);
   const [userMaxPageNum, setUserMaxPageNum] = useState(1);
+  const [allWeek, setAllWeek] = useState(false);
+  const [pageUserNum, setPageUserNum] = useState(1);
   // eslint-disable-next-line
 
   const markerOptions = {
@@ -130,7 +132,6 @@ export default function Map(props) {
   }, [pageNum, coordinates]);
 
   //FETCH TO PAGINATE USER
-
   useEffect(() => {
     if (!props.user.isAuthenticated) return;
     async function fetchData() {
@@ -142,7 +143,7 @@ export default function Map(props) {
       setUserMaxPageNum(parseInt(resp.maxPageNum));
     }
     fetchData();
-  }, [pageNum, coordinates]);
+  }, [pageUserNum, coordinates]);
 
   useEffect(() => {
     async function fetchData() {
@@ -179,13 +180,12 @@ export default function Map(props) {
   };
 
   const userEventShow = (e) => {
-    setPageNum(1);
+    setPageUserNum(1);
     setUserEventList(e);
   };
 
   const deleteEvent = async (e) => {
     if (!props.user.isAuthenticated) return;
-
     e.preventDefault();
     await fetch(`${process.env.REACT_APP_API_URL}/event/${id}`, {
       method: "DELETE",
@@ -202,9 +202,17 @@ export default function Map(props) {
   };
 
   // SHOW ALL EVENTS
-  const allEvents = async (e) => {
+  const allEvents = async () => {
     if (!props.user.isAuthenticated) return;
-
+    // //DELETE PAST EVENTS
+    // console.log(apiDate);
+    // await fetch(`${process.env.REACT_APP_API_URL}/event/${apiDate}`, {
+    //   method: "DELETE",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    // });
+    setAllWeek(true);
     setApiDate("");
     const data = await fetch(`${process.env.REACT_APP_API_URL}/event`);
     const resp = await data.json();
@@ -215,6 +223,10 @@ export default function Map(props) {
   // DOUBLE CLICk MAP
   const onMapClick = (event) => {
     if (props.user.isAuthenticated === true) {
+      if (allWeek) {
+        alert("Please select a day of the week");
+        return;
+      }
       onMapClick2(event);
     } else alert("Login to create an event");
   };
@@ -241,6 +253,7 @@ export default function Map(props) {
     setSelected(id);
     eventShow(false);
     userEventShow(false);
+    setAllWeek(true);
     setPageNum(1);
     await allEvents();
   };
@@ -250,7 +263,27 @@ export default function Map(props) {
 
   return (
     <div>
-      {props.user.isAuthenticated ? (
+      {!props.user.isAuthenticated ? (
+        <Jumbotron
+          fluid
+          style={{
+            backgroundImage: "url(./splash.jpg)",
+            backgroundSize: "cover",
+          }}
+        >
+          <div className="container">
+            <h1
+              style={{ fontFamily: "Fredoka One, cursive", fontSize: "4rem" }}
+            >
+              JoinMe<i class="fas fa-users"></i>
+            </h1>
+            <h5 style={{ fontSize: "1.5rem" }}>
+              Never miss an opportunity to spend time with friends.
+            </h5>
+            <p style={{ fontSize: "1rem" }}>Login or Register to continue</p>
+          </div>
+        </Jumbotron>
+      ) : (
         <div>
           <div className="blackBox">
             <Navbar.Brand className="navText">
@@ -429,6 +462,8 @@ export default function Map(props) {
                 allEvents={allEvents}
                 setSelected={setSelected}
                 setRightClick={setRightClick}
+                allWeek={allWeek}
+                setAllWeek={setAllWeek}
               />
             </div>
           </section>
@@ -556,22 +591,6 @@ export default function Map(props) {
             userEventShow={userEventShow}
           />
         </div>
-      ) : (
-        <Jumbotron
-          fluid
-          style={{
-            backgroundImage: "url(./splash.jpg)",
-            backgroundSize: "cover",
-          }}
-        >
-          <div className="container">
-            <h1 style={{ fontFamily: "Fredoka One, cursive" }}>
-              JoinMe<i class="fas fa-users"></i>
-            </h1>
-            <h5>Never miss an opportunity to spend time with friends.</h5>
-            <p>Login or Register to continue</p>
-          </div>
-        </Jumbotron>
       )}
     </div>
   );

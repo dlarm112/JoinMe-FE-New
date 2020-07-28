@@ -66,12 +66,19 @@ export default function Paginations(props) {
     setDisplay2(moment(display).format("MMM Do YYYY"));
     props.setDay(display);
     props.setApiDate(moment(display).format("MMDDYYYY"));
-  }, [display]);
+    console.log(props.allWeek)
+    if (props.allWeek) {
+      clickedPagination(100);
+    }
+  }, [display, props.allWeek]);
+
+
 
   const clickedPagination = async (e) => {
     if (e < 20) {
       setDisplay(date.setDate(date.getDate() + (e - 1)));
       props.setDay(display);
+      props.setAllWeek(false)
     }else if (e === 100){
       setDisplay2("All Week")
     }

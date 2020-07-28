@@ -23,7 +23,7 @@ p {
 
 .navText {
   color: white !important;
-  font-family: "Fredoka One", cursive;
+  font-family: "Fredoka One", Arial, Helvetica, sans-serif;
   z-index: 9000;
 }
 
